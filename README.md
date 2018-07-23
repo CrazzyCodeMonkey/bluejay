@@ -50,7 +50,7 @@ component output="false" {
 ```
 component output="false" {
   public function handler( struct data ) returnformat="json" {
-    return { success: data.recipient};
+    return { success: data.recipient };
   }
 
   public function getRoute(){
@@ -65,3 +65,30 @@ Bluejay supports four types of matching
 * Wildcard `message/*/`
 * Array data `message/%/`
 * Struct data `message/%recipient%/`
+
+## Accessing route match data
+#### Array data
+```
+component output="false" {
+  public function handler( array data ) returnformat="json" {
+    return { success: data[1] };
+  }
+
+  public function getRoute(){
+    return "message/%recipient%/";
+  }
+}
+```
+
+#### Struct data
+```
+component output="false" {
+  public function handler( struct data ) returnformat="json" {
+    return { success: data.recipient };
+  }
+
+  public function getRoute(){
+    return "message/%recipient%/";
+  }
+}
+```
