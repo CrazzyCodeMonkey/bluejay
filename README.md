@@ -27,8 +27,8 @@ Does rely on [Tuckeys Url Rewrite Filter](http://tuckey.org/urlrewrite/) and the
 ## Helpful magic
 Bluejay will automatically register route handlers found in /routes, just place your components there and make sure to implement a public handler() and a public getRoute() function.
 
-## Root Application.cfc
-```
+## Root Application.cfc example
+
 component output="false" {
   this.name = "BluejayExample";
 
@@ -58,3 +58,22 @@ component output="false" {
   }
 }
 ```
+
+## Route matching
+Bluejay supports four types of matching
+* Complete match
+* Wildcard
+* Array data
+* Struct data
+
+#### Complete match
+`message/status/`
+
+#### Wildcard
+`message/*/`
+
+#### Array data
+`message/%/`
+
+#### Struct data
+`message/%recipient%/`
