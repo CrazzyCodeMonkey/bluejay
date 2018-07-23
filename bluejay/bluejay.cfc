@@ -1,17 +1,19 @@
+component output="false" {
 /**
   Core Bluejay component.
   Currently does all the work.
 */
-component output="false" {
   function init( array routes = [] ) {
+    console("");
     console("Initializing Bluejay v." & this.getVersion());
+    console("");
     this.routes = [];
 
     // Automatically register components in the /routes folder.
     if( directoryExists( expandPath("/routes") ) ) {
       var routes = directoryList( expandPath("/routes") );
       var basePath = GetDirectoryfrompath(getBasetemplatepath());
-      
+
       for( var route in routes ) {
         var cleanPath = replace( route, basePath, "" );
         cleanPath = listFirst( cleanPath, "." );
@@ -23,21 +25,34 @@ component output="false" {
   }
 
 
-  private function getVersion(){
-    return 0.1;
+  private string function getVersion(){
+    return "0.1.1";
   }
 
 
   public boolean function registerRoute( required string pathToRoute ){
-    var tmp = createObject("component", "#pathToRoute#");
-    var route = {path: pathToRoute, route: tmp.getRoute(), comp: tmp};
-    
-    route.hasWildcard = (findOneOf(tmp.getRoute(), "*") != 0);
-    route.hasVariable = (findOneOf(tmp.getRoute(), "%") != 0);
-    
-    arrayAppend( this.routes, route );
+    var base = "iRoute";
+    try {
+      var tmp = createObject("component", "#pathToRoute#");
+    } catch (any err){
+      console("  !CRITICAL FAILURE trying to register #pathToRoute#");
+    }
 
-    return true;
+    if (isInstOf(tmp, base)){
+      var route = {
+        path: pathToRoute,
+        route: tmp.getRoute(),
+        hasWildcard: (findOneOf(tmp.getRoute(), "*") != 0),
+        hasVariable: (findOneOf(tmp.getRoute(), "%") != 0),
+        comp: tmp};
+      arrayAppend( this.routes, route );
+      console("  Successfully registered #route.comp.getRoute()# v#route.comp.getVersion()#");
+      return true;
+    } else {
+      console("  >Failed to register #pathToRoute#");
+      return false;
+    }
+
   }
 
 
@@ -102,11 +117,11 @@ component output="false" {
 
             if( isSimpleValue(data) ) {
               writeOutput(data);
-              
+
             } else {
               writeOutput(serializeJson(data));
             }
-            
+
             // Set returnformat if it's set
             if( structKeyExists( getMetaData(route.comp.handler), "returnformat" ) ){
               pc.getresponse().setcontenttype('application/' & getMetaData(route.comp.handler).returnformat);
@@ -119,16 +134,16 @@ component output="false" {
 
       } else {
         if( toMatch == route.route ) {
-          
+
           var data = route.comp.handler();
 
           if( isSimpleValue(data) ) {
             writeOutput(data);
-            
+
           } else {
             writeOutput(serializeJson(data));
           }
-          
+
           // Set returnformat if it's set
           if( structKeyExists( getMetaData(route.comp.handler), "returnformat" ) ){
             pc.getresponse().setcontenttype('application/' & getMetaData(route.comp.handler).returnformat);
@@ -154,4 +169,44 @@ component output="false" {
   private function fourOhFour(){
     return { sucess: false, reason: "No matching route found", code: 404 };
   }
+
+
+  private boolean function isInstOf(required component obj, required string typename){
+    var metadata = getMetaData(arguments.obj);
+    var polymorphicChain = [];
+
+    if (structKeyExists(metaData, "implements")){
+      if (isArray(metaData.implements)){
+        arrayConcat(polymorphicChain, metaData.implements);
+      } else {
+        arrayAppend(polymorphicChain, metaData.implements);
+      }
+    }
+
+    if (isArray(metaData.extends)){
+      arrayConcat(polymorphicChain, metaData.extends);
+    } else {
+      arrayAppend(polymorphicChain, metaData.extends);
+    }
+
+    return checkChain(polymorphicChain, typename);
+  }
+
+
+  private boolean function checkChain(required array chain, required string typename){
+    var inChain = false;
+
+
+     for (var item in arguments.chain){
+       inChain = inChain || this.checkItem(item, arguments.typename);
+     }
+
+    return inChain;
+  }
+
+  private boolean function checkItem(required struct link, required string typename){
+    return (right(link.name,len(typeName)) == typename);
+  }
+
+
 }
