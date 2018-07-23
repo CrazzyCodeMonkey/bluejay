@@ -75,7 +75,7 @@ component output="false" {
   }
 
   public function getRoute(){
-    return "message/%recipient%/";
+    return "message/%/";
   }
 }
 ```
