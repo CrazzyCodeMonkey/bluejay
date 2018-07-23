@@ -61,19 +61,7 @@ component output="false" {
 
 ## Route matching
 Bluejay supports four types of matching
-* Complete match
-* Wildcard
-* Array data
-* Struct data
-
-#### Complete match
-`message/status/`
-
-#### Wildcard
-`message/*/`
-
-#### Array data
-`message/%/`
-
-#### Struct data
-`message/%recipient%/`
+* Complete match `message/status/`
+* Wildcard `message/*/`
+* Array data `message/%/`
+* Struct data `message/%recipient%/`
